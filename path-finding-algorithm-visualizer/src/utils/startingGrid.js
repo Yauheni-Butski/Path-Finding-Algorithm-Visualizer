@@ -29,6 +29,7 @@ export function getGrid(width, height) {
 
   //set isstart in the middle
   grid[Math.floor(height / 2)][Math.floor(width / 2)].isStart = true;
+  //set end as right-bottom cell with 2x2 padding
   grid[height - 2][width - 2].isTarget = true;
 
   return grid;
