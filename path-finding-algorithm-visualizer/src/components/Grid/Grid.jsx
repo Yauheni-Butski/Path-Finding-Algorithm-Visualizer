@@ -48,6 +48,10 @@ export default function Grid() {
       refarray[c.x + c.y * 50].current.classList.add("visited");
 
       if (c.x == target.x && c.y == target.y) return [c, count];
+
+      /*
+      From c (current cell) go right.
+      */
       if (
         c.x + 1 < 50 &&
         !hashmap[`${c.x + 1}-${c.y}`] &&
@@ -57,6 +61,10 @@ export default function Grid() {
         prevmap[`${c.x + 1}-${c.y}`] = { ...c };
         hashmap[`${c.x + 1}-${c.y}`] = true;
       }
+
+      /*
+      From c (current cell) go left.
+      */
       if (
         c.x - 1 >= 0 &&
         !hashmap[`${c.x - 1}-${c.y}`] &&
@@ -66,6 +74,10 @@ export default function Grid() {
         prevmap[`${c.x - 1}-${c.y}`] = { ...c };
         hashmap[`${c.x - 1}-${c.y}`] = true;
       }
+
+      /*
+      From c (current cell) go down.
+      */
       if (
         c.y + 1 < 25 &&
         !hashmap[`${c.x}-${c.y + 1}`] &&
@@ -75,6 +87,10 @@ export default function Grid() {
         prevmap[`${c.x}-${c.y + 1}`] = { ...c };
         hashmap[`${c.x}-${c.y + 1}`] = true;
       }
+
+      /*
+      From c (current cell) go top.
+      */
       if (
         c.y - 1 >= 0 &&
         !hashmap[`${c.x}-${c.y - 1}`] &&
@@ -90,59 +106,90 @@ export default function Grid() {
 
   /*
   Depth-first search is very similar: with small changes in the order, we can remove and add elements to the array.
+  In BDS our path from current is:
+  1) down
+  2) left
+  3) top
+  4) right
   */
   function BDS(graph, hashmap, prevmap, start, target) {
-    let queue = [start];
+    let stack = [start];
     let count = 0;
     hashmap[`${start.x}-${start.y}`] = true;
 
-    while (queue.length > 0) {
+    while (stack.length > 0) {
       count += 1;
-      let c = queue[0];
-      queue.shift();
+      let c = stack[0]; //we get from the first position, as was added from 'unshift()'. So iterate like with stack.
+      stack.shift();
       refarray[c.x + c.y * 50].current.style["transition-delay"] = `${
         count * 8
       }ms`;
       refarray[c.x + c.y * 50].current.classList.add("visited");
       if (c.x == target.x && c.y == target.y) return [c, count];
 
+      /*
+      From c (current cell) go down.
+      Check that not last (< 25 as 25 is our height/y axis)
+      Check that was not visited before - !hashmap['key']
+      Check that it is not Wall
+      */
       if (
         c.y + 1 < 25 &&
         !hashmap[`${c.x}-${c.y + 1}`] &&
         !graph[c.y + 1][c.x].isWall
       ) {
-        queue.unshift({ x: c.x, y: c.y + 1 });
+        stack.unshift({ x: c.x, y: c.y + 1 }); //unshift - add at the first position = [0]
         prevmap[`${c.x}-${c.y + 1}`] = { ...c };
         hashmap[`${c.x}-${c.y + 1}`] = true;
       }
+
+      /*
+      From c (current cell) go left.
+      Check that was not visited before - !hashmap['key']
+      Check that it is not Wall
+      */
       if (
         c.x - 1 >= 0 &&
         !hashmap[`${c.x - 1}-${c.y}`] &&
         !graph[c.y][c.x - 1].isWall
       ) {
-        queue.unshift({ x: c.x - 1, y: c.y });
+        stack.unshift({ x: c.x - 1, y: c.y });
         prevmap[`${c.x - 1}-${c.y}`] = { ...c };
         hashmap[`${c.x - 1}-${c.y}`] = true;
       }
+
+      /*
+      From c (current cell) go top.
+      Check that was not visited before - !hashmap['key']
+      Check that it is not Wall
+      */
       if (
         c.y - 1 >= 0 &&
         !hashmap[`${c.x}-${c.y - 1}`] &&
         !graph[c.y - 1][c.x].isWall
       ) {
-        queue.unshift({ x: c.x, y: c.y - 1 });
+        stack.unshift({ x: c.x, y: c.y - 1 });
         prevmap[`${c.x}-${c.y - 1}`] = { ...c };
         hashmap[`${c.x}-${c.y - 1}`] = true;
       }
+
+      /*
+      From c (current cell) go right.
+      Check that not last (< 25 as 25 is our height/y axis)
+      Check that was not visited before - !hashmap['key']
+      Check that it is not Wall
+      */
       if (
         c.x + 1 < 50 &&
         !hashmap[`${c.x + 1}-${c.y}`] &&
         !graph[c.y][c.x + 1].isWall
       ) {
-        queue.unshift({ x: c.x + 1, y: c.y });
+        stack.unshift({ x: c.x + 1, y: c.y });
         prevmap[`${c.x + 1}-${c.y}`] = { ...c };
         hashmap[`${c.x + 1}-${c.y}`] = true;
       }
     }
+
     return null;
   }
 
@@ -254,6 +301,8 @@ export default function Grid() {
           path.push(current);
           current = prevmap[`${current.x}-${current.y}`];
         }
+        path.push(current); //as our last point which will not has previous record in prevmap will be our start point,
+        //to paint it also - add it in the end
 
         setTimeout(() => {
           path.reverse().forEach((elem, index) => {
@@ -287,6 +336,8 @@ export default function Grid() {
           path.push(current);
           current = prevmap[`${current.x}-${current.y}`];
         }
+        path.push(current); //as our last point which will not has previous record in prevmap will be our start point,
+        //to paint it also - add it in the end
 
         setTimeout(() => {
           path.reverse().forEach((elem, index) => {
@@ -332,6 +383,7 @@ export default function Grid() {
             onMouseUp={() => seteditFlag(false)}
             onMouseMove={() => changeCellOnMouseMove(xIndex, yIndex)}
           >
+            {`${xIndex}-${yIndex}`}
             {cell.weight > 1 ? <i className="bi bi-virus"></i> : null}
             {cell.isStart ? <i className="bi bi-geo-alt"></i> : null}
             {cell.isTarget ? <i className="bi bi-geo"></i> : null}

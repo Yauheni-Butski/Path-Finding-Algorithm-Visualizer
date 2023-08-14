@@ -11,10 +11,10 @@ export function getGrid(width, height) {
   let grid = [];
 
   for (let i = 0; i < height; i++) {
-    let column = [];
+    let row = [];
 
     for (let j = 0; j < width; j++) {
-      column.push({
+      row.push({
         x: j,
         y: i,
         isStart: false,
@@ -24,7 +24,7 @@ export function getGrid(width, height) {
       });
     }
 
-    grid.push(column);
+    grid.push(row);
   }
 
   //set isstart in the middle
